@@ -28,3 +28,5 @@ More information about the program with
 ```bash
 python3 preparation.py -h
 ```
+
+## Training of the MLP
