@@ -14,3 +14,5 @@ The first column is the waited output, the features selected are :
 - W Radius, W Texture, W Smoothness, W Compactness, W Concavity, W Concave Points
 
 For more information, look DataAnalysis.md.
+
+# Dataset separation
