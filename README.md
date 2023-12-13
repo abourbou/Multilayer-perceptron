@@ -15,4 +15,16 @@ The first column is the waited output, the features selected are :
 
 For more information, look DataAnalysis.md.
 
-# Dataset separation
+## Dataset preparation
+
+```bash
+python3 separate.py [-h] [--seed SEED] [--perc_validation PERC_VALIDATION] [--preprocessing {none,std,norm}] file
+```
+Preprocess and separate the dataset into a training dataset (used to train the MLP)
+and a validation dataset (used to validate the training).
+
+
+More information about the program with
+```bash
+python3 preparation.py -h
+```
