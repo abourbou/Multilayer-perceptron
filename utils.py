@@ -3,12 +3,22 @@ import csv
 
 
 # Math helper
-def sigmoid(value):
-    return 1 / (1 + np.exp(-1.0 * value))
+def sigmoid(x):
+    return 1 / (1 + np.exp(-1.0 * x))
 
 
-def relu(value):
-    return max(0, value)
+def derivative_sigmoid(x):
+    return sigmoid(x) * (1 - sigmoid(x))
+
+
+def relu(x):
+    return max(0, x)
+
+
+def derivative_relu(x):
+    if x > 0:
+        return 1
+    return 0
 
 
 def softmax(vec: np.ndarray):
@@ -23,17 +33,17 @@ def binary_cross_entropy(ground_truth: np.ndarray, predicted_values: np.ndarray)
     if (
         ground_truth.ndim != 1
         or predicted_values.ndim != 1
-        or ground_truth.len != predicted_values.len
+        or len(ground_truth) != len(predicted_values)
     ):
         raise ValueError(f"Incorrect input for binaryCrossEntropy")
-    predicted_values = 0.0
-    for i in range(ground_truth.len):
-        predicted_values = (
-            predicted_values
+    sum_cross = 0.0
+    for i in range(len(ground_truth)):
+        sum_cross = (
+            sum_cross
             + ground_truth[i] * np.log(predicted_values[i])
             + (1 - ground_truth[i]) * np.log(1 - predicted_values[i])
         )
-    return predicted_values / ground_truth.len
+    return sum_cross / len(ground_truth)
 
 
 # File helper

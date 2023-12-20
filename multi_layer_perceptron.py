@@ -56,8 +56,10 @@ class Layer:
         # Init activation function
         if params.activation == "sigmoid":
             self.activation = utils.sigmoid
+            self.d_activation = utils.derivative_sigmoid
         elif params.activation == "reLU":
             self.activation = utils.relu
+            self.d_activation = utils.derivative_relu
         elif params.activation == "softmax":
             self.activation = utils.softmax
         else:
@@ -100,7 +102,13 @@ class MultiLayerPerceptron:
             or input.size != self.input_size
         ):
             raise ValueError(f"Invalid intput to the Multi Layer Perceptron")
+        result = []
         for layer in self.layers:
             input = layer.forward_process(input)
+            result.append(input)
+        result.append(self.output_layer.forward_process(input))
 
-        return self.output_layer.forward_process(input)
+        return result
+
+    def backward_propagation(self, ground_truth, predicted_values):
+        loss = self.loss_function(ground_truth, predicted_values)

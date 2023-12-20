@@ -27,10 +27,22 @@ def main():
 
     mlp = MultiLayerPerceptron(input)
 
-    training_dataset = utils.open_csv(args.training_dataset)
+    print(mlp.layers)
+    print([layer.weights for layer in mlp.layers])
+    print(mlp.output_layer.weights)
 
-    test_data = np.array(training_dataset[0][1:]).astype(float)
-    print(mlp.forward_pass(test_data))
+    # training_dataset = utils.open_csv(args.training_dataset)
+
+    # # Test on the first data
+    # test_data = np.array(training_dataset[0][1:]).astype(float)
+    # results = mlp.forward_pass(test_data)
+    # print()
+
+    # # Loss Computation
+    # ground_truth = np.zeros(2)
+    # print(int(training_dataset[0][0]))
+    # ground_truth[int(training_dataset[0][0])] = 1
+    # print(f"loss : {mlp.loss_function(ground_truth, results[-1])}")
 
 
 if __name__ == "__main__":
