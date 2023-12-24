@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import argparse
+import os
 
 
 def main():
@@ -140,7 +141,10 @@ def main():
             "W Concave Points",
         ]
     ]
-    selected_features.to_csv("data/filter_data.csv", index=False, header=True)
+
+    filter_name = os.path.dirname(args.file) + "/filter_data.csv"
+    selected_features.to_csv(filter_name, index=False, header=True)
+    print(f"Save the filtered data in {filter_name}")
 
 
 if __name__ == "__main__":
