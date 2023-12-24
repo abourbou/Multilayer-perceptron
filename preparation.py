@@ -38,6 +38,12 @@ def Parse():
         default="std",
         help="Preprocessing of the data, choice between no preprocessing, standardization or normalization (default: %(default)s)",
     )
+
+    parser.add_argument(
+        "--cancer_diagnostic",
+        action="store_true",
+        help="For cancer diagnostic change results M or B to numbers 1 or 0",
+    )
     return parser.parse_args()
 
 
@@ -98,6 +104,10 @@ def main():
 
     # Preprocessing dataset
     data = Preprocessing(dataset, path_dataset, args.preprocessing)
+
+    # Changing M or B to 1 or 0 for Cancer Diagnostic
+    if args.cancer_diagnostic:
+        data["Diagnosis"] = data["Diagnosis"].map({"M": 1, "B": 0})
 
     # Separate dataset
     Separate(data, path_dataset, perc_validation, seed)
