@@ -8,7 +8,7 @@ import os
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(
-        prog="analysis.py", description="Analyse and filter the dataset"
+        prog=os.path.basename(__file__), description="Analyse and filter the dataset"
     )
     parser.add_argument("file", type=str, help="file to analyse and filter")
     parser.add_argument(

@@ -15,7 +15,7 @@ def float_range(value):
 # Parse arguments
 def Parse():
     parser = argparse.ArgumentParser(
-        prog="separate.py",
+        prog=os.path.basename(__file__),
         description="Preprocess and eparate the dataset into training dataset and validation dataset",
     )
     parser.add_argument("file", type=str, help="file to separate")

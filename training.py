@@ -3,11 +3,14 @@ import json
 from multi_layer_perceptron import Hyperparameters, MultiLayerPerceptron
 import utils
 import numpy as np
+import os
 
 
 def main():
     # Parse arguments
-    parser = argparse.ArgumentParser(prog="training.py", description="Train")
+    parser = argparse.ArgumentParser(
+        prog=os.path.basename(__file__), description="Train"
+    )
     parser.add_argument("training_dataset", type=str, help="path to training dataset")
     parser.add_argument(
         "validation_dataset", type=str, help="path to validation dataset"
