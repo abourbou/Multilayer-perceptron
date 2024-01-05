@@ -7,12 +7,12 @@
     "input_size": 17,
     "layers": [
         {
-            "size": 16,
+            "size": 2,
             "activation": "sigmoid",
             "weights_init": "random"
         },
         {
-            "size": 16,
+            "size": 3,
             "activation": "sigmoid",
             "weights_init": "random"
         }

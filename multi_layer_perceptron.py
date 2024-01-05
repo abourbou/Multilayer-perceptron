@@ -11,20 +11,20 @@ import utils
 # TODO create 2 activation function : sigmoid / reLU
 
 # TODO create 2 loss_function : one for binary classification
-# TODO and one for multiclass classification (maybe one for regression ?)
+# TODO and one for multiclass classification
 
 
 # @dataclass
 class LayerParams(BaseModel):
     size: PositiveInt
-    activation: Literal["sigmoid", "reLU"]
-    weights_init: Literal["zero", "random", "scaled_initialization"]
+    activation: Literal["sigmoid"]
+    weights_init: Literal["zero", "random"]
 
 
 class OutputLayerParams(BaseModel):
     size: PositiveInt
     activation: Literal["softmax"]
-    weights_init: Literal["zero", "random", "scaled_initialization"]
+    weights_init: Literal["zero", "random"]
 
 
 # @dataclass
@@ -42,6 +42,7 @@ class Hyperparameters(BaseModel):
 class Layer:
     def __init__(self, prev_size: PositiveInt, params: LayerParams):
         self.input_size = prev_size
+        self.size = params.size
         # Init weights
         if params.weights_init == "zero":
             self.weights = np.zeros((params.size, prev_size))
