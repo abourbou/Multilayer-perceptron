@@ -52,6 +52,16 @@ def binary_cross_entropy(ground_truth: np.ndarray, predicted_values: np.ndarray)
     return -sum_cross / len(ground_truth)
 
 
+# https://towardsdatascience.com/deriving-backpropagation-with-cross-entropy-loss-d24811edeaf9
+def derivative_binary_cross_entropy(ground_truth: float, predicted_value: float):
+    epsilon = 1e-7
+    predicted_value = np.clip(predicted_value, epsilon, 1 - epsilon)
+
+    return -(
+        (ground_truth / predicted_value) - (1 - ground_truth) / (1 - predicted_value)
+    )
+
+
 # File helper
 def open_csv(filename):
     file = open(filename, "r")

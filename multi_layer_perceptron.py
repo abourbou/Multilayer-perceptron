@@ -62,6 +62,7 @@ class Layer:
             self.d_activation = utils.derivative_relu
         elif params.activation == "softmax":
             self.activation = utils.softmax
+            self.d_activation = utils.derivative_softmax
         else:
             raise ValueError(f"Unknown activation function: {params.activation}")
 
