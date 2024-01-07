@@ -27,22 +27,36 @@ def main():
 
     mlp = MultiLayerPerceptron(input)
 
-    print(mlp.layers)
-    print([layer.weights for layer in mlp.layers])
-    print(mlp.output_layer.weights)
+    # print(mlp.layers)
+    # print([layer.weights for layer in mlp.layers])
+    # print(mlp.output_layer.weights)
 
-    # training_dataset = utils.open_csv(args.training_dataset)
+    training_dataset = utils.open_csv(args.training_dataset)
 
-    # # Test on the first data
-    # test_data = np.array(training_dataset[0][1:]).astype(float)
-    # results = mlp.forward_pass(test_data)
-    # print()
+    # Test on the first data
+    test_data = np.array(training_dataset[0][1:]).astype(float)
+    results = mlp.forward_pass(test_data)
 
-    # # Loss Computation
+    # ! TESTS DERIVATIVE
+    # # print(f"activation NN : \n{results}")
+    # print(f"output : {results[-1]}")
+
+    # # # Loss Computation
     # ground_truth = np.zeros(2)
-    # print(int(training_dataset[0][0]))
     # ground_truth[int(training_dataset[0][0])] = 1
+    # print(f"groundtruth first value : {ground_truth}")
+
     # print(f"loss : {mlp.loss_function(ground_truth, results[-1])}")
+
+    # print(
+    #     f"derivate loss for activation 0 : {utils.derivative_binary_cross_entropy(ground_truth, results[-1])}"
+    # )
+    # ! TESTS DERIVATIVE
+
+    # ! TESTS backward_propagation
+    ground_truth = np.zeros(2)
+    ground_truth[int(training_dataset[0][0])] = 1
+    mlp.backward_propagation(ground_truth, results)
 
 
 if __name__ == "__main__":

@@ -84,6 +84,7 @@ class MultiLayerPerceptron:
         self.learning_rate = params.learning_rate
         if params.loss_function == "binaryCrossEntropy":
             self.loss_function = utils.binary_cross_entropy
+            self.d_loss_function = utils.derivative_binary_cross_entropy
         else:
             raise ValueError(f"Unknown loss function")
         self.input_size = params.input_size
@@ -103,6 +104,7 @@ class MultiLayerPerceptron:
             or input.size != self.input_size
         ):
             raise ValueError(f"Invalid intput to the Multi Layer Perceptron")
+
         result = []
         for layer in self.layers:
             input = layer.forward_process(input)
@@ -111,5 +113,22 @@ class MultiLayerPerceptron:
 
         return result
 
-    def backward_propagation(self, ground_truth, predicted_values):
-        loss = self.loss_function(ground_truth, predicted_values)
+    # Compute the derivatives for each weight and bias (bias are the first coefficient)
+    def backward_propagation(self, ground_truth, result):
+        # Compute derivative for the output layer
+        output = result[-1]
+        if self.output_layer.activation == utils.softmax:
+            print(f"activation : {output}")
+            dC_da = self.d_loss_function(ground_truth, output)
+            print(f"dC / da : {dC_da}")
+            # Compute dC / dzn for each activation
+            d_activations = []
+            for i in range(0, len(output)):
+                d_activation = 0.0
+                for j in range(0, len(output)):
+                    if i == j:
+                        d_activation += dC_da[j] * output[j] * (1 - output[j])
+                    else:
+                        d_activation += dC_da[j] * -(output[i] * output[j])
+                d_activations.append(d_activation)
+            print(f"dC / dz : {d_activations}")
