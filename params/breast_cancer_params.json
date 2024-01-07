@@ -2,7 +2,7 @@
     "seed": 42,
     "epochs": 64,
     "batch_size": 16,
-    "learning_rate": 0.001,
+    "learning_rate": 0.5,
     "loss_function": "binaryCrossEntropy",
     "input_size": 17,
     "layers": [

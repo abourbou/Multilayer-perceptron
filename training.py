@@ -27,22 +27,26 @@ def main():
 
     mlp = MultiLayerPerceptron(input)
 
-    print(mlp.layers)
-    print([layer.weights for layer in mlp.layers])
-    print(mlp.output_layer.weights)
+    # Extract dataset
+    training_dataset = utils.open_csv(args.training_dataset)
+    validation_dataset = utils.open_csv(args.validation_dataset)
 
-    # training_dataset = utils.open_csv(args.training_dataset)
+    gt_poss = [np.array([1.0, 0.0]), np.array([0.0, 1.0])]
+    training_data = [np.array(data[1:]).astype(float) for data in training_dataset]
+    training_gt_data = [gt_poss[int(data[0])] for data in training_dataset]
 
-    # # Test on the first data
-    # test_data = np.array(training_dataset[0][1:]).astype(float)
-    # results = mlp.forward_pass(test_data)
-    # print()
+    validation_data = [np.array(data[1:]).astype(float) for data in validation_dataset]
+    validation_gt_data = [gt_poss[int(data[0])] for data in validation_dataset]
 
-    # # Loss Computation
-    # ground_truth = np.zeros(2)
-    # print(int(training_dataset[0][0]))
-    # ground_truth[int(training_dataset[0][0])] = 1
-    # print(f"loss : {mlp.loss_function(ground_truth, results[-1])}")
+    # ! TEST LOSS ON EVERY DATA
+    for _i in range(mlp.epochs):
+        loss = mlp.batch_gradient_descent(training_data, training_gt_data)
+        print(f"loss : {loss}")
+        print(
+            f"validation loss : {mlp.compute_loss(validation_data, validation_gt_data)}"
+        )
+
+    print(f"final loss : {mlp.compute_loss(training_data, training_gt_data)}")
 
 
 if __name__ == "__main__":

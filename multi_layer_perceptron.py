@@ -43,13 +43,11 @@ class Layer:
     def __init__(self, prev_size: PositiveInt, params: LayerParams):
         self.input_size = prev_size
         self.size = params.size
-        # Init weights
+        # Init weights and bias
         if params.weights_init == "zero":
-            self.weights = np.zeros((params.size, prev_size))
-            self.bias = np.zeros(params.size)
+            self.weights = np.zeros((params.size, prev_size + 1))
         elif params.weights_init == "random":
-            self.weights = np.random.rand(params.size, prev_size)
-            self.bias = np.random.rand(params.size)
+            self.weights = np.random.rand(params.size, prev_size + 1)
         else:
             raise ValueError(f"Unknown weights_init: {params.weights_init}")
 
@@ -73,7 +71,7 @@ class Layer:
             or input.size != self.input_size
         ):
             raise ValueError(f"Invalid input to forward process")
-        return self.activation(np.matmul(self.weights, input) + self.bias)
+        return self.activation(np.matmul(self.weights, np.insert(input, 0, 1)))
 
 
 class MultiLayerPerceptron:
@@ -84,6 +82,7 @@ class MultiLayerPerceptron:
         self.learning_rate = params.learning_rate
         if params.loss_function == "binaryCrossEntropy":
             self.loss_function = utils.binary_cross_entropy
+            self.d_loss_function = utils.derivative_binary_cross_entropy
         else:
             raise ValueError(f"Unknown loss function")
         self.input_size = params.input_size
@@ -103,7 +102,8 @@ class MultiLayerPerceptron:
             or input.size != self.input_size
         ):
             raise ValueError(f"Invalid intput to the Multi Layer Perceptron")
-        result = []
+
+        result = [input]
         for layer in self.layers:
             input = layer.forward_process(input)
             result.append(input)
@@ -111,5 +111,59 @@ class MultiLayerPerceptron:
 
         return result
 
-    def backward_propagation(self, ground_truth, predicted_values):
-        loss = self.loss_function(ground_truth, predicted_values)
+    # Compute the derivatives for each weight and bias (bias are the first coefficient)
+    def backward_propagation(self, ground_truth, result):
+        weights_derivative = []
+        # Compute derivative for the output layer
+        output = result[-1]
+        if self.output_layer.activation == utils.softmax:
+            # Compute dC / dzn for each activation
+            d_activations = 2 * (output - ground_truth)
+
+        # Add derivative for the output layer
+        d_weights_output = np.concatenate(
+            (
+                np.array(d_activations).reshape(2, 1),
+                np.outer(d_activations, result[-2]),
+            ),
+            axis=1,
+        )
+        weights_derivative.append(d_weights_output)
+
+        weights_derivative.reverse()
+        return weights_derivative
+
+    def compute_loss(self, coeff_data, gt_data):
+        loss = 0.0
+        for i in range(len(coeff_data)):
+            result = self.forward_pass(coeff_data[i])
+            loss += self.loss_function(gt_data[i], result[-1])
+            # print(f"loss[{i}] : {self.loss_function(gt_data[i], result[-1])}")
+        return loss / len(coeff_data)
+
+    # Perform batch gradient descent, return the loss before the update
+    def batch_gradient_descent(self, coeff_data, gt_data):
+        nbr_data = len(coeff_data)
+        mean_loss = 0.0
+        weight_deriv_by_data = None
+        for i in range(nbr_data):
+            results = self.forward_pass(coeff_data[i])
+            mean_loss += self.loss_function(gt_data[i], results[-1])
+            derivates = self.backward_propagation(gt_data[i], results)
+            if weight_deriv_by_data == None:
+                weight_deriv_by_data = derivates
+            else:
+                for j in range(len(derivates)):
+                    weight_deriv_by_data[j] = np.add(
+                        weight_deriv_by_data[j], derivates[j]
+                    )
+        # Divide by the number of data
+        weight_deriv_by_data = list(
+            map(lambda vec: vec / nbr_data, weight_deriv_by_data)
+        )
+        mean_loss = mean_loss / nbr_data
+
+        # Update weights
+        self.output_layer.weights -= self.learning_rate * weight_deriv_by_data[0]
+
+        return mean_loss
