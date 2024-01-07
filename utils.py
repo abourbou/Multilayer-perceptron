@@ -29,6 +29,10 @@ def softmax(vec: np.ndarray):
     return exp / sum_exp
 
 
+def derivative_softmax(softmax_value):
+    return softmax_value * (1 - softmax_value)
+
+
 def binary_cross_entropy(ground_truth: np.ndarray, predicted_values: np.ndarray):
     if (
         ground_truth.ndim != 1
@@ -37,13 +41,15 @@ def binary_cross_entropy(ground_truth: np.ndarray, predicted_values: np.ndarray)
     ):
         raise ValueError(f"Incorrect input for binaryCrossEntropy")
     sum_cross = 0.0
+    epsilon = 1e-15
+    predicted_values = np.clip(predicted_values, epsilon, 1 - epsilon)
     for i in range(len(ground_truth)):
         sum_cross = (
             sum_cross
             + ground_truth[i] * np.log(predicted_values[i])
             + (1 - ground_truth[i]) * np.log(1 - predicted_values[i])
         )
-    return sum_cross / len(ground_truth)
+    return -sum_cross / len(ground_truth)
 
 
 # File helper
