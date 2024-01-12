@@ -120,25 +120,49 @@ class MultiLayerPerceptron:
             # Compute dC / dzn for each activation
             d_activations = 2 * (output - ground_truth)
 
-        # Add derivative for the output layer
-        d_weights_output = np.concatenate(
-            (
-                np.array(d_activations).reshape(2, 1),
-                np.outer(d_activations, result[-2]),
-            ),
-            axis=1,
+        # Compute weights derivative from d_activations
+        weights_derivative.append(
+            MultiLayerPerceptron.deriv_d_activation(d_activations, result[-2])
         )
-        weights_derivative.append(d_weights_output)
+
+        # Compute L - 1 hidden layer
+        for l in range(1, len(self.layers) + 1):
+            next_layer = self.output_layer if l == 1 else self.layers[1 - l]
+            current_layer = self.layers[-l]
+            current_activation = result[-l - 1]
+
+            if current_layer.activation == utils.sigmoid:
+                # Compute dC / dzn for each activation
+                d_activations = np.matmul(
+                    next_layer.weights[:, 1:].transpose(), d_activations
+                )
+                # For sigmoid da / dz
+                d_activations = np.multiply(
+                    current_activation * (1 - current_activation), d_activations
+                )
+                d_weights_output = MultiLayerPerceptron.deriv_d_activation(
+                    d_activations, result[-l - 2]
+                )
+            weights_derivative.append(d_weights_output)
 
         weights_derivative.reverse()
         return weights_derivative
+
+    # Helper function computing derivative from d_activation for each layer L
+    # dC/dw = d_activation(L) * activation(L-1) and dC/db = d_activation(L)
+    def deriv_d_activation(d_activations, prev_activations):
+        dweights = np.outer(d_activations, prev_activations)
+        # Add the bias (=d_activations) before the weights
+        return np.concatenate(
+            (d_activations.reshape(d_activations.size, 1), dweights),
+            axis=1,
+        )
 
     def compute_loss(self, coeff_data, gt_data):
         loss = 0.0
         for i in range(len(coeff_data)):
             result = self.forward_pass(coeff_data[i])
             loss += self.loss_function(gt_data[i], result[-1])
-            # print(f"loss[{i}] : {self.loss_function(gt_data[i], result[-1])}")
         return loss / len(coeff_data)
 
     # Perform batch gradient descent, return the loss before the update
@@ -164,6 +188,10 @@ class MultiLayerPerceptron:
         mean_loss = mean_loss / nbr_data
 
         # Update weights
-        self.output_layer.weights -= self.learning_rate * weight_deriv_by_data[0]
+        self.output_layer.weights -= self.learning_rate * weight_deriv_by_data[-1]
+        for l in range(0, len(self.layers)):
+            self.layers[-l - 1].weights -= (
+                self.learning_rate * weight_deriv_by_data[-l - 2]
+            )
 
         return mean_loss

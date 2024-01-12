@@ -1,18 +1,18 @@
 {
     "seed": 42,
-    "epochs": 64,
+    "epochs": 100,
     "batch_size": 16,
-    "learning_rate": 0.5,
+    "learning_rate": 0.3,
     "loss_function": "binaryCrossEntropy",
     "input_size": 17,
     "layers": [
         {
-            "size": 2,
+            "size": 8,
             "activation": "sigmoid",
             "weights_init": "random"
         },
         {
-            "size": 3,
+            "size": 4,
             "activation": "sigmoid",
             "weights_init": "random"
         }
