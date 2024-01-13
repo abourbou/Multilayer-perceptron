@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 def print_learning_curves(
     training_loss, training_accuracy, validation_loss, validation_accuracy
 ):
-    print(len(training_loss))
     x = np.array(range(1, len(training_loss) + 1))
     fig, axs = plt.subplots(1, 2, figsize=(16, 9))
 

@@ -11,16 +11,6 @@ def derivative_sigmoid(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
 
-def relu(x):
-    return max(0, x)
-
-
-def derivative_relu(x):
-    if x > 0:
-        return 1
-    return 0
-
-
 def softmax(vec: np.ndarray):
     if vec.ndim != 1:
         raise ValueError(f"Softmax can be applied on vector only")

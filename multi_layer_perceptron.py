@@ -3,37 +3,28 @@ from pydantic import BaseModel, PositiveInt, PositiveFloat
 import numpy as np
 import utils
 
-#! PARAMETER TODO LIST
-
-# TODO Enable 3 modes of weights initialization
-# TODO zero / random / scaled_initialization
-
-# TODO create 2 activation function : sigmoid / reLU
-
-# TODO create 2 loss_function : one for binary classification
-# TODO and one for multiclass classification
+# TODO Save list of weights + use them to inference
 
 
 # @dataclass
 class LayerParams(BaseModel):
     size: PositiveInt
-    activation: Literal["sigmoid"]
-    weights_init: Literal["zero", "random"]
+    activation: Literal["sigmoid", "reLU"]
+    weights_init: Literal["random"]
 
 
 class OutputLayerParams(BaseModel):
     size: PositiveInt
     activation: Literal["softmax"]
-    weights_init: Literal["zero", "random"]
+    weights_init: Literal["random"]
 
 
 # @dataclass
 class Hyperparameters(BaseModel):
     seed: PositiveInt
     epochs: PositiveInt
-    batch_size: PositiveInt
     learning_rate: PositiveFloat
-    loss_function: Literal["binaryCrossEntropy", "categorialCrossEntropy"]
+    loss_function: Literal["binaryCrossEntropy"]
     input_size: PositiveInt
     layers: List[LayerParams]
     output: OutputLayerParams
@@ -44,9 +35,7 @@ class Layer:
         self.input_size = prev_size
         self.size = params.size
         # Init weights and bias
-        if params.weights_init == "zero":
-            self.weights = np.zeros((params.size, prev_size + 1))
-        elif params.weights_init == "random":
+        if params.weights_init == "random":
             self.weights = np.random.rand(params.size, prev_size + 1)
         else:
             raise ValueError(f"Unknown weights_init: {params.weights_init}")
@@ -78,7 +67,6 @@ class MultiLayerPerceptron:
     def __init__(self, params: Hyperparameters):
         np.random.seed(params.seed)
         self.epochs = params.epochs
-        self.batch_size = params.batch_size
         self.learning_rate = params.learning_rate
         if params.loss_function == "binaryCrossEntropy":
             self.loss_function = utils.binary_cross_entropy
