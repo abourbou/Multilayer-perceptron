@@ -158,21 +158,25 @@ class MultiLayerPerceptron:
             axis=1,
         )
 
-    def compute_loss(self, coeff_data, gt_data):
+    def compute_loss_and_accuracy(self, coeff_data, gt_data):
         loss = 0.0
+        accuracy = 0.0
         for i in range(len(coeff_data)):
             result = self.forward_pass(coeff_data[i])
             loss += self.loss_function(gt_data[i], result[-1])
-        return loss / len(coeff_data)
+            if np.argmax(result[-1]) == np.argmax(gt_data[i]):
+                accuracy += 1
+
+        loss /= len(coeff_data)
+        accuracy /= len(coeff_data)
+        return (loss, accuracy)
 
     # Perform batch gradient descent, return the loss before the update
     def batch_gradient_descent(self, coeff_data, gt_data):
         nbr_data = len(coeff_data)
-        mean_loss = 0.0
         weight_deriv_by_data = None
         for i in range(nbr_data):
             results = self.forward_pass(coeff_data[i])
-            mean_loss += self.loss_function(gt_data[i], results[-1])
             derivates = self.backward_propagation(gt_data[i], results)
             if weight_deriv_by_data == None:
                 weight_deriv_by_data = derivates
@@ -185,7 +189,6 @@ class MultiLayerPerceptron:
         weight_deriv_by_data = list(
             map(lambda vec: vec / nbr_data, weight_deriv_by_data)
         )
-        mean_loss = mean_loss / nbr_data
 
         # Update weights
         self.output_layer.weights -= self.learning_rate * weight_deriv_by_data[-1]
@@ -193,5 +196,3 @@ class MultiLayerPerceptron:
             self.layers[-l - 1].weights -= (
                 self.learning_rate * weight_deriv_by_data[-l - 2]
             )
-
-        return mean_loss
