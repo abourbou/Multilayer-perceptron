@@ -41,14 +41,20 @@ def main():
     parser.add_argument(
         "parameter_file", type=str, help="path to parameter file of the net"
     )
+    parser.add_argument(
+        "--weights_file",
+        type=str,
+        default="weights_file",
+        help="name of the weights file",
+    )
 
     args = parser.parse_args()
 
     with open(args.parameter_file, "r") as file:
         json_data = json.load(file)
-        input = Hyperparameters(**json_data)
+        hyp_params = Hyperparameters(**json_data)
 
-    mlp = MultiLayerPerceptron(input)
+    mlp = MultiLayerPerceptron(hyp_params)
 
     # Extract dataset
     training_dataset = utils.open_csv(args.training_dataset)
@@ -71,24 +77,49 @@ def main():
         # Update training metrics
         (loss, acc) = mlp.compute_loss_and_accuracy(training_data, training_gt_data)
         training_loss.append(loss)
-        training_accuracy.append(acc)
+        training_accuracy.append(acc * 100)
 
         # Update validation metrics
         (loss, acc) = mlp.compute_loss_and_accuracy(validation_data, validation_gt_data)
         validation_loss.append(loss)
-        validation_accuracy.append(acc)
+        validation_accuracy.append(acc * 100)
 
         print(
             f"epoch {epoch} / {mlp.epochs} - loss: {training_loss[-1]:.6f} - val_loss : {validation_loss[-1]:.6f}"
         )
 
-    print(
-        f"final loss : {mlp.compute_loss_and_accuracy(training_data, training_gt_data)[0]:.6f}"
-    )
+    (loss, acc) = mlp.compute_loss_and_accuracy(training_data, training_gt_data)
+    print(f"final loss : {loss:.6f} - final accuracy : {acc * 100:.2f}%")
 
     print_learning_curves(
         training_loss, training_accuracy, validation_loss, validation_accuracy
     )
+
+    # Save the weights if the use wants it
+    val = ""
+    while val != "yes" and val != "no" and val != "n" and val != "y":
+        val = input("Do you want to save the weights ? (yes/no)\n")
+
+    if val == "yes" or val == "y":
+        weights_file_name = f"{args.weights_file}.npz"
+
+        dict_mlp = {}
+        # Add weights
+        for i in range(len(mlp.layers)):
+            name = f"sigmoid{i}"
+            dict_mlp[name] = mlp.layers[i].weights
+        name = f"softmax{len(mlp.layers)}"
+        dict_mlp[name] = mlp.output_layer.weights
+
+        # Add other informations
+        dict_mlp["input_size"] = mlp.input_size
+        dict_mlp["epochs"] = mlp.epochs
+        dict_mlp["learning_rate"] = mlp.learning_rate
+        dict_mlp["loss_function"] = "binaryCrossEntropy"
+        dict_mlp["nbr_hidden_layer"] = len(mlp.layers)
+
+        np.savez(weights_file_name, **dict_mlp)
+        print(f"Save weights in {weights_file_name}")
 
 
 if __name__ == "__main__":
