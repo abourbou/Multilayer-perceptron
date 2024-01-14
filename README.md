@@ -34,3 +34,19 @@ python3 preparation.py data/Diagnostic_Breast_Cancer/filter_data.csv --cancer_di
 ```
 
 ## Training of the MLP
+
+Create a Multi Layer Perceptron network and train it using the training dataset and validation dataset.
+The neural network parameters are loaded from a JSON.
+
+```bash
+python3 training.py data/Diagnostic_Breast_Cancer/training_data.csv data/Diagnostic_Breast_Cancer/validation_data.csv params/breast_cancer_params.json
+```
+
+The weights of the network can be saved afterward.
+
+## Validation of the MLP
+
+Load weights and a dataset to validate model by computing loss and accuracy.
+```bash
+python3 prediction.py weights_file.npz data/Diagnostic_Breast_Cancer/training_data.csv
+```
