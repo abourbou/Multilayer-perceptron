@@ -32,6 +32,8 @@ class Hyperparameters(BaseModel):
 
 class Layer:
     def __init__(self, prev_size: PositiveInt, params: LayerParams):
+        if params == None:
+            return
         self.input_size = prev_size
         self.size = params.size
         # Init weights and bias
@@ -53,6 +55,24 @@ class Layer:
         else:
             raise ValueError(f"Unknown activation function: {params.activation}")
 
+    def load_weights(self, weights, activation):
+        (self.size, self.input_size) = np.shape(weights)
+        self.input_size -= 1
+        self.weights = weights
+
+        # Init activation function
+        if activation == "sigmoid":
+            self.activation = utils.sigmoid
+            self.d_activation = utils.derivative_sigmoid
+        elif activation == "reLU":
+            self.activation = utils.relu
+            self.d_activation = utils.derivative_relu
+        elif activation == "softmax":
+            self.activation = utils.softmax
+            self.d_activation = utils.derivative_softmax
+        else:
+            raise ValueError(f"Unknown activation function: {activation}")
+
     def forward_process(self, input):
         if (
             not isinstance(input, np.ndarray)
@@ -65,6 +85,8 @@ class Layer:
 
 class MultiLayerPerceptron:
     def __init__(self, params: Hyperparameters):
+        if params == None:
+            return
         np.random.seed(params.seed)
         self.epochs = params.epochs
         self.learning_rate = params.learning_rate
@@ -82,6 +104,35 @@ class MultiLayerPerceptron:
             self.layers.append(Layer(prev_size, layer))
             prev_size = layer.size
         self.output_layer = Layer(prev_size, params.output)
+
+    # Load weights from an file
+    def load_weights(self, weights_file_name):
+        weights_file = np.load(weights_file_name)
+        dict_mlp = {key: weights_file[key] for key in weights_file.files}
+
+        self.input_size = dict_mlp["input_size"]
+        self.epochs = dict_mlp["epochs"]
+        self.learning_rate = dict_mlp["learning_rate"]
+        if dict_mlp["loss_function"] == "binaryCrossEntropy":
+            self.loss_function = utils.binary_cross_entropy
+            self.d_loss_function = utils.derivative_binary_cross_entropy
+        else:
+            raise ValueError(f"Unknown loss function")
+
+        # Load hidden layers and output layer
+        nbr_layers = dict_mlp["nbr_hidden_layer"]
+        self.layers = []
+        for i in reversed(range(0, nbr_layers + 1)):
+            current_key = next((key for key in dict_mlp.keys() if key.endswith(str(i))))
+            weights_layer = dict_mlp.pop(current_key)
+            new_layer = Layer(1, None)
+            new_layer.load_weights(weights_layer, current_key.replace(str(i), ""))
+            if i == nbr_layers:
+                self.output_layer = new_layer
+            else:
+                self.layers.insert(0, new_layer)
+
+        weights_file.close()
 
     def forward_pass(self, input: np.ndarray):
         if (
