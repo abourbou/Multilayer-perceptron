@@ -71,7 +71,7 @@ def main():
     training_accuracy = []
     validation_loss = []
     validation_accuracy = []
-    for epoch in range(mlp.epochs):
+    for epoch in range(0, mlp.epochs):
         mlp.batch_gradient_descent(training_data, training_gt_data)
 
         # Update training metrics
@@ -85,7 +85,7 @@ def main():
         validation_accuracy.append(acc * 100)
 
         print(
-            f"epoch {epoch} / {mlp.epochs} - loss: {training_loss[-1]:.6f} - val_loss : {validation_loss[-1]:.6f}"
+            f"epoch {epoch + 1} / {mlp.epochs} - loss: {training_loss[-1]:.6f} - val_loss : {validation_loss[-1]:.6f}"
         )
 
     (loss, acc) = mlp.compute_loss_and_accuracy(training_data, training_gt_data)
